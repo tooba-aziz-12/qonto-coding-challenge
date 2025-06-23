@@ -15,19 +15,5 @@ services:
       - mysql_data:/var/lib/mysql
     restart: always
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: banking-app
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mysql
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/banking
-      SPRING_DATASOURCE_USERNAME: devuser
-      SPRING_DATASOURCE_PASSWORD: devpass
-
 volumes:
   mysql_data:
