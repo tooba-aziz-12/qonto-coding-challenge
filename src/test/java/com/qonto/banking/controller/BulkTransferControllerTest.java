@@ -6,6 +6,7 @@ import com.qonto.banking.model.BankAccount;
 import com.qonto.banking.model.Transaction;
 import com.qonto.banking.repository.BankAccountRepository;
 import com.qonto.banking.repository.TransactionRepository;
+import com.qonto.banking.service.util.MoneyUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static com.qonto.banking.fixture.TransferFixture.highPrecisionRequest;
+import static com.qonto.banking.fixture.TransferFixture.transferRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -55,7 +57,7 @@ class BulkTransferIntegrationTest {
         mockMvc.perform(
                 post("/api/bulk-transfers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(TransferFixture.transferRequest)
+                        .content(objectMapper.writeValueAsString(transferRequest()))
         ).andExpect(status().isCreated());
 
         BankAccount sender = bankAccountRepository.findByIbanAndBic("IBAN1", "BIC1").orElseThrow();
@@ -82,7 +84,7 @@ class BulkTransferIntegrationTest {
         mockMvc.perform(
                 post("/api/bulk-transfers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(TransferFixture.transferRequest)
+                        .content(objectMapper.writeValueAsString(transferRequest()))
         ).andExpect(status().isUnprocessableEntity());
 
         BankAccount updatedSender = bankAccountRepository.findByIbanAndBic("IBAN1", "BIC1").orElseThrow();
@@ -94,13 +96,31 @@ class BulkTransferIntegrationTest {
 
     @Test
     void shouldReturnErrorWhenSenderAccountNotFound() throws Exception {
-        // Remove sender
         bankAccountRepository.deleteAll();
 
         mockMvc.perform(
                 post("/api/bulk-transfers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(TransferFixture.transferRequest)
+                        .content(objectMapper.writeValueAsString(transferRequest()))
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldReturnErrorWhenInvalidRequestProvided() throws Exception {
+        String malformedRequest = """
+            {
+                "organization_iban": "IBAN1",
+                "organizationBic": "BIC1",
+                "creditTransfers": [
+                    { "amount": "12.345.67", "counterpartyName": "Oops", "counterpartyIban": "IBAN2" }
+                ]
+            }
+        """;
+
+        mockMvc.perform(
+                post("/api/bulk-transfers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(malformedRequest)
         ).andExpect(status().isNotFound());
     }
 
@@ -116,23 +136,15 @@ class BulkTransferIntegrationTest {
         mockMvc.perform(
                 post("/api/bulk-transfers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(highPrecisionRequest)
+                        .content(objectMapper.writeValueAsString(highPrecisionRequest()))
         ).andExpect(status().isCreated());
 
         BankAccount sender = bankAccountRepository.findByIbanAndBic("IBAN_BIG", "BIC_BIG").orElseThrow();
 
-        long expectedCentsA = new BigDecimal("1234.56789")
-                .setScale(2, BigDecimal.ROUND_HALF_UP)
-                .multiply(BigDecimal.valueOf(100))
-                .longValueExact();
-
-        long expectedCentsB = new BigDecimal("9876.54321")
-                .setScale(2, BigDecimal.ROUND_HALF_UP)
-                .multiply(BigDecimal.valueOf(100))
-                .longValueExact();
+        long expectedCentsA = MoneyUtils.eurosToCents("1234.56789");
+        long expectedCentsB = MoneyUtils.eurosToCents("9876.54321");
 
         long totalExpectedCents = expectedCentsA + expectedCentsB;
-
         long expectedRemainingBalance = totalBalanceInCents - totalExpectedCents;
 
         assertEquals(expectedRemainingBalance, sender.getBalanceCents(), "No cents should be lost on large decimal transfer");
