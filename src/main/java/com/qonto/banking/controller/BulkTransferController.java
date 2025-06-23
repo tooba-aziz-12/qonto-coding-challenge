@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/transfers")
 public class BulkTransferController {
 
     private final BulkTransferService bulkTransferService;
@@ -16,8 +16,7 @@ public class BulkTransferController {
         this.bulkTransferService = bulkTransferService;
     }
 
-    ///transfers/bulk
-    @PostMapping("/bulk-transfers")
+    @PostMapping("/bulk")
     public ResponseEntity<?> handleBulkTransfer(
             @Valid @RequestBody BulkTransferRequest request,
             @RequestHeader("trace-id") String traceId

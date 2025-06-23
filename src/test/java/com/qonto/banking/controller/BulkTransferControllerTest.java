@@ -55,7 +55,8 @@ class BulkTransferIntegrationTest {
     @Test
     void shouldProcessBulkTransferAndUpdateBalance() throws Exception {
         mockMvc.perform(
-                post("/api/bulk-transfers")
+                post("/transfers/bulk")
+                        .header("trace-id", "test-trace-id")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(transferRequest()))
         ).andExpect(status().isCreated());
@@ -63,11 +64,10 @@ class BulkTransferIntegrationTest {
         BankAccount sender = bankAccountRepository.findByIbanAndBic("IBAN1", "BIC1").orElseThrow();
         BankAccount receiver = bankAccountRepository.findByIbanAndBic("IBAN2", "BIC2").orElseThrow();
 
-        // 1000 - (5.00 + 3.00) = 200
-        assertEquals(200L, sender.getBalanceCents(), "Sender balance should be reduced after bulk transfer");
+        assertEquals(200L, sender.getBalanceCents());
 
         List<Transaction> transactions = transactionRepository.findAll();
-        assertEquals(2, transactions.size(), "Two transactions should be created");
+        assertEquals(2, transactions.size());
 
         assertTrue(transactions.stream().allMatch(txn ->
                 txn.getCounterpartyIban().equals("IBAN2") &&
@@ -78,20 +78,21 @@ class BulkTransferIntegrationTest {
     @Test
     void shouldReturnErrorWhenInsufficientFunds() throws Exception {
         BankAccount sender = bankAccountRepository.findByIbanAndBic("IBAN1", "BIC1").orElseThrow();
-        sender.setBalanceCents(100L); // less than needed (800)
+        sender.setBalanceCents(100L);
         bankAccountRepository.save(sender);
 
         mockMvc.perform(
-                post("/api/bulk-transfers")
+                post("/transfers/bulk")
+                        .header("trace-id", "test-trace-id")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(transferRequest()))
         ).andExpect(status().isUnprocessableEntity());
 
         BankAccount updatedSender = bankAccountRepository.findByIbanAndBic("IBAN1", "BIC1").orElseThrow();
-        assertEquals(100L, updatedSender.getBalanceCents(), "Balance should not change on failure");
+        assertEquals(100L, updatedSender.getBalanceCents());
 
         List<Transaction> transactions = transactionRepository.findAll();
-        assertEquals(0, transactions.size(), "No transactions should be created");
+        assertEquals(0, transactions.size());
     }
 
     @Test
@@ -99,7 +100,8 @@ class BulkTransferIntegrationTest {
         bankAccountRepository.deleteAll();
 
         mockMvc.perform(
-                post("/api/bulk-transfers")
+                post("/transfers/bulk")
+                        .header("trace-id", "test-trace-id")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(transferRequest()))
         ).andExpect(status().isNotFound());
@@ -108,17 +110,18 @@ class BulkTransferIntegrationTest {
     @Test
     void shouldReturnErrorWhenInvalidRequestProvided() throws Exception {
         String malformedRequest = """
-            {
-                "organization_iban": "IBAN1",
-                "organizationBic": "BIC1",
-                "creditTransfers": [
-                    { "amount": "12.345.67", "counterpartyName": "Oops", "counterpartyIban": "IBAN2" }
-                ]
-            }
-        """;
+        {
+            "organization_iban": "IBAN1",
+            "organizationBic": "BIC1",
+            "creditTransfers": [
+                { "amount": "12.345.67", "counterpartyName": "Oops", "counterpartyIban": "IBAN2" }
+            ]
+        }
+    """;
 
         mockMvc.perform(
-                post("/api/bulk-transfers")
+                post("/transfers/bulk")
+                        .header("trace-id", "test-trace-id")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(malformedRequest)
         ).andExpect(status().isNotFound());
@@ -134,7 +137,8 @@ class BulkTransferIntegrationTest {
         bankAccountRepository.save(new BankAccount("High Roller", totalBalanceInCents, "IBAN_BIG", "BIC_BIG"));
 
         mockMvc.perform(
-                post("/api/bulk-transfers")
+                post("/transfers/bulk")
+                        .header("trace-id", "test-trace-id")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(highPrecisionRequest()))
         ).andExpect(status().isCreated());
@@ -147,12 +151,12 @@ class BulkTransferIntegrationTest {
         long totalExpectedCents = expectedCentsA + expectedCentsB;
         long expectedRemainingBalance = totalBalanceInCents - totalExpectedCents;
 
-        assertEquals(expectedRemainingBalance, sender.getBalanceCents(), "No cents should be lost on large decimal transfer");
+        assertEquals(expectedRemainingBalance, sender.getBalanceCents());
 
         List<Transaction> transactions = transactionRepository.findAll();
         long totalStoredCents = transactions.stream().mapToLong(Transaction::getAmountCents).sum();
 
-        assertEquals(totalExpectedCents, totalStoredCents, "Stored transaction amounts must exactly match deduction");
+        assertEquals(totalExpectedCents, totalStoredCents);
     }
 
 }

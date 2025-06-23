@@ -22,7 +22,7 @@ public class TransactionRetryService {
 
     //This method is to be called by the cron
     public void retryAllFailedTransfers() {
-        List<Transaction> failedTransactions = transactionRepository.fetchFailedTransactions();
+       /* List<Transaction> failedTransactions = transactionRepository.fetchFailedTransactions();
 
         List<TransferResult> transferResults = notifier.notifyExternalService(failedTransactions);
 
@@ -30,7 +30,7 @@ public class TransactionRetryService {
                 .filter(it -> it.getHasError().equals(true))
                 .forEach(transferResult -> {
             // Retry failed -> Alerting mechanism should trigger to escalate to the dev team
-        });
+        });*/
     }
 
 }
