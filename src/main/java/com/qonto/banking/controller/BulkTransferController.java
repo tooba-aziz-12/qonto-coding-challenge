@@ -16,9 +16,13 @@ public class BulkTransferController {
         this.bulkTransferService = bulkTransferService;
     }
 
+    ///transfers/bulk
     @PostMapping("/bulk-transfers")
-    public ResponseEntity<?> handleBulkTransfer(@Valid @RequestBody BulkTransferRequest request) {
-        bulkTransferService.process(request);
+    public ResponseEntity<?> handleBulkTransfer(
+            @Valid @RequestBody BulkTransferRequest request,
+            @RequestHeader("trace-id") String traceId
+    ) {
+        bulkTransferService.process(request, traceId);
         return ResponseEntity.status(201).build();
     }
 }

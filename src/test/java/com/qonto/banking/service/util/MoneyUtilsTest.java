@@ -1,6 +1,5 @@
-package com.qonto.banking.util;
+package com.qonto.banking.service.util;
 
-import com.qonto.banking.service.util.MoneyUtils;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

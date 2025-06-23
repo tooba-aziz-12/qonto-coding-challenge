@@ -1,6 +1,7 @@
 package com.qonto.banking.service;
 
 import com.qonto.banking.dto.BulkTransferRequest;
+import com.qonto.banking.event.BulkTransferCompletedEvent;
 import com.qonto.banking.exception.AccountNotFoundException;
 import com.qonto.banking.exception.BulkTransferFailedException;
 import com.qonto.banking.exception.InsufficientFundsException;
@@ -26,6 +27,9 @@ public class BulkTransferService {
     private final BankAccountRepository bankAccountRepository;
     private final TransactionRepository transactionRepository;
 
+    //private final ApplicationEventPublisher eventPublisher;
+
+
     @Autowired
     public BulkTransferService(BankAccountRepository bankAccountRepository, TransactionRepository transactionRepository) {
         this.bankAccountRepository = bankAccountRepository;
@@ -33,15 +37,12 @@ public class BulkTransferService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void process(BulkTransferRequest request) {
+    public void process(BulkTransferRequest request, String traceId) {
         String encodedIban = encodeIban(request.getOrganizationIban());
         try {
             BankAccount sender = bankAccountRepository
                     .findByIbanAndBic(request.getOrganizationIban(), request.getOrganizationBic())
                     .orElseThrow(() -> new AccountNotFoundException(encodedIban));
-
-            System.out.println("=== Bulk Transfer Debug ===");
-            System.out.println("Sender balance before: " + sender.getBalanceCents());
 
             Long totalCents = request.getCreditTransfers().stream()
                     .map(t -> MoneyUtils.eurosToCents(t.getAmount()))
@@ -52,13 +53,24 @@ public class BulkTransferService {
                 throw new InsufficientFundsException(encodedIban);
             }
 
-            List<Transaction> txns = TransactionMapper.mapToTransactions(request.getCreditTransfers(), sender);
-            transactionRepository.saveAll(txns);
+            List<Transaction> transactions = TransactionMapper.mapToTransactions(request.getCreditTransfers(), sender);
+            transactionRepository.saveAll(transactions);
 
             sender.setBalanceCents(sender.getBalanceCents() - totalCents);
             bankAccountRepository.save(sender);
 
-            System.out.println("Sender balance after: " + sender.getBalanceCents());
+            // After save, emit event for async delivery
+            // The listener will:
+            // 1. Attempt to notify external system of transfer
+            // 2. If notification fails → enqueue (db) for retry the failing ones
+            // 3. A scheduled cron job runs daily to reattempt these failed rollbacks from the DB
+            // 4. If retry fails , alerting mechanism to escalate to dev team.
+
+            /* eventPublisher.publishEvent(new BulkTransferCompletedEvent(
+                    this,
+                    generateTransferBatchId(), // Semantic placeholder
+                    transactions
+            ));*/
 
         } catch (ArithmeticException | NumberFormatException e) {
             throw new InvalidAmountException("Invalid amount provided in transfer request", encodedIban, e);
