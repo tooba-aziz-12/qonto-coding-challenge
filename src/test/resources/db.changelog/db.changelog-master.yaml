@@ -1,0 +1,4 @@
+databaseChangeLog:
+  - include:
+      file: create_banking_tables_test.sql
+      relativeToChangelogFile: true

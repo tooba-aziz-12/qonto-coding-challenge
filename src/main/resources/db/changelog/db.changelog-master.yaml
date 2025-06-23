@@ -1,0 +1,4 @@
+databaseChangeLog:
+  - include:
+      file: create_banking_tables_and_seed_data.sql
+      relativeToChangelogFile: true
