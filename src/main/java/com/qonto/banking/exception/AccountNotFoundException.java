@@ -2,29 +2,29 @@ package com.qonto.banking.exception;
 
 public class AccountNotFoundException extends RuntimeException {
 
-    private final String encodedIban;
+    private final String traceId;
 
-    public AccountNotFoundException(String encodedIban) {
-        super("Bank account not found for IBAN: " + encodedIban);
-        this.encodedIban = encodedIban;
+    public AccountNotFoundException(String traceId) {
+        super("Bank account not found for IBAN: " + traceId);
+        this.traceId = traceId;
     }
 
-    public AccountNotFoundException(String message, String encodedIban) {
+    public AccountNotFoundException(String message, String traceId) {
         super(message);
-        this.encodedIban = encodedIban;
+        this.traceId = traceId;
     }
 
-    public AccountNotFoundException(String message, Throwable cause, String encodedIban) {
+    public AccountNotFoundException(String message, Throwable cause, String traceId) {
         super(message, cause);
-        this.encodedIban = encodedIban;
+        this.traceId = traceId;
     }
 
-    public AccountNotFoundException(Throwable cause, String encodedIban) {
+    public AccountNotFoundException(Throwable cause, String traceId) {
         super(cause);
-        this.encodedIban = encodedIban;
+        this.traceId = traceId;
     }
 
-    public String getEncodedIban() {
-        return encodedIban;
+    public String getTraceId() {
+        return traceId;
     }
 }

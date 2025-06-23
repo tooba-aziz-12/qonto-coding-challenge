@@ -5,11 +5,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-public class StaleTransferCleanupJob {
+public class RetryFailedTransferJob {
 
     TransactionRetryService transactionRetryService;
 
-    public StaleTransferCleanupJob(TransactionRetryService transactionRetryService) {
+    public RetryFailedTransferJob(TransactionRetryService transactionRetryService) {
         this.transactionRetryService = transactionRetryService;
     }
 

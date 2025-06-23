@@ -2,15 +2,15 @@ package com.qonto.banking.exception;
 
 
 public class InvalidAmountException extends RuntimeException {
-    private final String encodedIban;
+    private final String traceId;
 
-    public InvalidAmountException(String message, String encodedIban, Throwable cause) {
+    public InvalidAmountException(String message, String traceId, Throwable cause) {
         super(message, cause);
-        this.encodedIban = encodedIban;
+        this.traceId = traceId;
     }
 
-    public String getEncodedIban() {
-        return encodedIban;
+    public String getTraceId() {
+        return traceId;
     }
 }
 

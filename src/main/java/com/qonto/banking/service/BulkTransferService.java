@@ -16,9 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -38,11 +35,10 @@ public class BulkTransferService {
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void process(BulkTransferRequest request, String traceId) {
-        String encodedIban = encodeIban(request.getOrganizationIban());
         try {
             BankAccount sender = bankAccountRepository
                     .findByIbanAndBic(request.getOrganizationIban(), request.getOrganizationBic())
-                    .orElseThrow(() -> new AccountNotFoundException(encodedIban));
+                    .orElseThrow(() -> new AccountNotFoundException(traceId));
 
             Long totalCents = request.getCreditTransfers().stream()
                     .map(t -> MoneyUtils.eurosToCents(t.getAmount()))
@@ -50,7 +46,7 @@ public class BulkTransferService {
                     .sum();
 
             if (sender.getBalanceCents() < totalCents) {
-                throw new InsufficientFundsException(encodedIban);
+                throw new InsufficientFundsException(traceId);
             }
 
             List<Transaction> transactions = TransactionMapper.mapToTransactions(request.getCreditTransfers(), sender);
@@ -73,16 +69,11 @@ public class BulkTransferService {
             ));*/
 
         } catch (ArithmeticException | NumberFormatException e) {
-            throw new InvalidAmountException("Invalid amount provided in transfer request", encodedIban, e);
+            throw new InvalidAmountException("Invalid amount provided in transfer request", traceId, e);
         } catch (AccountNotFoundException | InsufficientFundsException e) {
             throw e;
         } catch (Exception e) {
-            throw new BulkTransferFailedException("An unexpected error occurred while processing the bulk transfer", encodedIban, e);
+            throw new BulkTransferFailedException("An unexpected error occurred while processing the bulk transfer", traceId, e);
         }
-    }
-
-    private String encodeIban(String iban) {
-        if (iban == null) return "null";
-        return Base64.getEncoder().encodeToString(iban.getBytes(StandardCharsets.UTF_8));
     }
 }

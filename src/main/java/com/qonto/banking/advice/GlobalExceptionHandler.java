@@ -18,26 +18,26 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccountNotFoundException.class)
     public ResponseEntity<String> handleAccountNotFound(AccountNotFoundException ex) {
-        log.warn("Account not found for encoded IBAN={}: {}", ex.getEncodedIban(), ex.getMessage());
+        log.warn("Account not found for Trace Id={}: {}", ex.getTraceId(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
     @ExceptionHandler(InsufficientFundsException.class)
     public ResponseEntity<String> handleInsufficientFunds(InsufficientFundsException ex) {
-        log.warn("Insufficient funds for encoded IBAN={}: {}", ex.getEncodedIban(), ex.getMessage());
+        log.warn("Insufficient funds for Trace Id={}: {}", ex.getTraceId(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ex.getMessage());
     }
 
     @ExceptionHandler(BulkTransferFailedException.class)
     public ResponseEntity<String> handleBulkTransferFailed(BulkTransferFailedException ex) {
-        log.error("Unexpected error during bulk transfer for encoded IBAN={}: {}", ex.getEncodedIban(), ex.getMessage(), ex);
+        log.error("Unexpected error during bulk transfer for Trace Id={}: {}", ex.getTraceId(), ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Bulk transfer failed. Please try again later.");
     }
 
     @ExceptionHandler(InvalidAmountException.class)
     public ResponseEntity<String> handleInvalidAmount(InvalidAmountException ex) {
-        log.error("Invalid amount found in transfer IBAN={}: {}", ex.getEncodedIban(), ex.getMessage(), ex);
+        log.error("Invalid amount found in Trace Id={}: {}", ex.getTraceId(), ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body("Bulk transfer failed. Please try again later.");
     }
