@@ -1,7 +1,7 @@
 package com.qonto.banking.service;
 
-import com.qonto.banking.dto.TransferResult;
-import com.qonto.banking.gateway.TransferNotificationClient;
+import com.qonto.banking.dto.TransferResultExternal;
+import com.qonto.banking.gateway.BulkTransferExternalServiceClient;
 import com.qonto.banking.model.Transaction;
 import com.qonto.banking.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ public class TransactionRetryService {
 
     TransactionRepository transactionRepository;
 
-    TransferNotificationClient notifier;
+    BulkTransferExternalServiceClient notifier;
 
     public TransactionRetryService(TransactionRepository transactionRepository) {
         this.transactionRepository = transactionRepository;
@@ -24,11 +24,11 @@ public class TransactionRetryService {
     public void retryAllFailedTransfers() {
         List<Transaction> failedTransactions = transactionRepository.fetchFailedTransactions();
 
-        List<TransferResult> transferResults = notifier.notifyExternalService(failedTransactions);
+        List<TransferResultExternal> transferResultExternals = notifier.notifyExternalService(failedTransactions);
 
-        transferResults.stream()
+        transferResultExternals.stream()
                 .filter(it -> it.getHasError().equals(true))
-                .forEach(transferResult -> {
+                .forEach(transferResultExternal -> {
             // Retry failed -> Alerting mechanism should trigger to escalate to the dev team
         });
     }

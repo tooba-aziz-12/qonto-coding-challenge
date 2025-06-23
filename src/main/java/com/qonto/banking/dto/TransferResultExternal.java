@@ -1,10 +1,10 @@
 package com.qonto.banking.dto;
 
-public class TransferResult{
+public class TransferResultExternal {
     Boolean hasError;
     Throwable exception;
 
-    public TransferResult(Boolean hasError, Throwable exception) {
+    public TransferResultExternal(Boolean hasError, Throwable exception) {
         this.hasError = hasError;
         this.exception = exception;
     }

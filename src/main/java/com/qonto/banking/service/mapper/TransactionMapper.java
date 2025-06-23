@@ -3,6 +3,7 @@ package com.qonto.banking.service.mapper;
 import com.qonto.banking.dto.CreditTransfer;
 import com.qonto.banking.model.BankAccount;
 import com.qonto.banking.model.Transaction;
+import com.qonto.banking.service.util.MoneyUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,10 +17,7 @@ public class TransactionMapper {
                 creditTransfer.getCounterpartyName(),
                 creditTransfer.getCounterpartyIban(),
                 creditTransfer.getCounterpartyBic(),
-                new BigDecimal(creditTransfer.getAmount())
-                        .setScale(2, BigDecimal.ROUND_HALF_UP)
-                        .multiply(BigDecimal.valueOf(100))
-                        .longValueExact(),
+                MoneyUtils.eurosToCents(creditTransfer.getAmount()),
                 "EUR",
                 creditTransfer.getDescription(),
                 sender
