@@ -137,10 +137,6 @@ class BulkTransferIntegrationTest {
 
         assertEquals(expectedRemainingBalance, sender.getBalanceCents(), "No cents should be lost on large decimal transfer");
 
-        System.out.println("========= REMAINING BALANCE =========");
-        System.out.println(expectedRemainingBalance);
-        System.out.println(sender.getBalanceCents());
-
         List<Transaction> transactions = transactionRepository.findAll();
         long totalStoredCents = transactions.stream().mapToLong(Transaction::getAmountCents).sum();
 

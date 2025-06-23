@@ -1,21 +1,21 @@
 package com.qonto.banking.service;
 
 import com.qonto.banking.dto.BulkTransferRequest;
-import com.qonto.banking.dto.CreditTransfer;
 import com.qonto.banking.exception.AccountNotFoundException;
 import com.qonto.banking.exception.BulkTransferFailedException;
 import com.qonto.banking.exception.InsufficientFundsException;
-import com.qonto.banking.service.mapper.TransactionMapper;
+import com.qonto.banking.exception.InvalidAmountException;
 import com.qonto.banking.model.BankAccount;
 import com.qonto.banking.model.Transaction;
 import com.qonto.banking.repository.BankAccountRepository;
 import com.qonto.banking.repository.TransactionRepository;
+import com.qonto.banking.service.mapper.TransactionMapper;
+import com.qonto.banking.service.util.MoneyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
@@ -41,16 +41,11 @@ public class BulkTransferService {
                     .orElseThrow(() -> new AccountNotFoundException(encodedIban));
 
             System.out.println("=== Bulk Transfer Debug ===");
-
             System.out.println("Sender balance before: " + sender.getBalanceCents());
 
             Long totalCents = request.getCreditTransfers().stream()
-                    .map(t ->
-                        new BigDecimal(t.getAmount())
-                                .setScale(2,BigDecimal.ROUND_HALF_UP )
-                                .multiply(BigDecimal.valueOf(100))
-                    )
-                    .mapToLong(BigDecimal::longValueExact)
+                    .map(t -> MoneyUtils.eurosToCents(t.getAmount()))
+                    .mapToLong(Long::longValue)
                     .sum();
 
             if (sender.getBalanceCents() < totalCents) {
@@ -62,8 +57,11 @@ public class BulkTransferService {
 
             sender.setBalanceCents(sender.getBalanceCents() - totalCents);
             bankAccountRepository.save(sender);
+
             System.out.println("Sender balance after: " + sender.getBalanceCents());
 
+        } catch (ArithmeticException | NumberFormatException e) {
+            throw new InvalidAmountException("Invalid amount provided in transfer request", encodedIban, e);
         } catch (AccountNotFoundException | InsufficientFundsException e) {
             throw e;
         } catch (Exception e) {

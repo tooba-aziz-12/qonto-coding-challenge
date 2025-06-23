@@ -3,6 +3,7 @@ package com.qonto.banking.advice;
 import com.qonto.banking.exception.AccountNotFoundException;
 import com.qonto.banking.exception.BulkTransferFailedException;
 import com.qonto.banking.exception.InsufficientFundsException;
+import com.qonto.banking.exception.InvalidAmountException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,6 +32,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleBulkTransferFailed(BulkTransferFailedException ex) {
         log.error("Unexpected error during bulk transfer for encoded IBAN={}: {}", ex.getEncodedIban(), ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Bulk transfer failed. Please try again later.");
+    }
+
+    @ExceptionHandler(InvalidAmountException.class)
+    public ResponseEntity<String> handleInvalidAmount(BulkTransferFailedException ex) {
+        log.error("Invalid amount found in transfer IBAN={}: {}", ex.getEncodedIban(), ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body("Bulk transfer failed. Please try again later.");
     }
 }
