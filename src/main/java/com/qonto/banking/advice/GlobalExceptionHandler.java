@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidAmountException.class)
-    public ResponseEntity<String> handleInvalidAmount(BulkTransferFailedException ex) {
+    public ResponseEntity<String> handleInvalidAmount(InvalidAmountException ex) {
         log.error("Invalid amount found in transfer IBAN={}: {}", ex.getEncodedIban(), ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body("Bulk transfer failed. Please try again later.");
