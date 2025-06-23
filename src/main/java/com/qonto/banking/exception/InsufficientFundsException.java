@@ -5,7 +5,7 @@ public class InsufficientFundsException extends RuntimeException {
     private final String traceId;
 
     public InsufficientFundsException(String traceId) {
-        super("Insufficient funds to complete the transfer request for IBAN: " + traceId);
+        super("Insufficient funds to complete the transfer request for Trace id: " + traceId);
         this.traceId = traceId;
     }
 

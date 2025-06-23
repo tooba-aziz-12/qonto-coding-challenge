@@ -12,7 +12,7 @@ public class Transaction {
     public Transaction() {
     }
 
-    public Transaction(UUID id, String counterpartyName, String counterpartyIban, String counterpartyBic, Long amountCents, String amountCurrency, String description, BankAccount bankAccount) {
+    public Transaction(String id, String counterpartyName, String counterpartyIban, String counterpartyBic, Long amountCents, String amountCurrency, String description, BankAccount bankAccount) {
         this.id = id;
         this.counterpartyName = counterpartyName;
         this.counterpartyIban = counterpartyIban;
@@ -24,8 +24,8 @@ public class Transaction {
     }
 
     @Id
-    @Column(name = "id", columnDefinition = "UUID", updatable = false, nullable = false)
-    private UUID id = UUID.randomUUID();
+    @Column(name = "id", length = 36, updatable = false, nullable = false)
+    private String id = UUID.randomUUID().toString();
 
     @Column(name = "counterparty_name")
     private String counterpartyName;
@@ -52,11 +52,11 @@ public class Transaction {
     // transactionStatus -> PENDING/SUCCESSFUL/ERROR
 
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 

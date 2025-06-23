@@ -13,7 +13,7 @@ public class TransactionMapper {
 
     public static Transaction mapToTransaction(CreditTransfer creditTransfer, BankAccount sender) {
         return new Transaction(
-                UUID.randomUUID(),
+                UUID.randomUUID().toString(),
                 creditTransfer.getCounterpartyName(),
                 creditTransfer.getCounterpartyIban(),
                 creditTransfer.getCounterpartyBic(),

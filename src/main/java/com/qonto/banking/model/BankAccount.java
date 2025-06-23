@@ -13,7 +13,7 @@ public class BankAccount {
     public BankAccount() {
     }
 
-    public BankAccount(UUID id, String organizationName, long balanceCents, String iban, String bic) {
+    public BankAccount(String id, String organizationName, long balanceCents, String iban, String bic) {
         this.id = id;
         this.organizationName = organizationName;
         this.balanceCents = balanceCents;
@@ -21,15 +21,15 @@ public class BankAccount {
         this.bic = bic;
     }
     public BankAccount(String organizationName, long balanceCents, String iban, String bic) {
-        this.id = UUID.randomUUID();
+        this.id = UUID.randomUUID().toString();
         this.organizationName = organizationName;
         this.balanceCents = balanceCents;
         this.iban = iban;
         this.bic = bic;
     }
     @Id
-    @Column(name = "id", columnDefinition = "UUID", updatable = false, nullable = false)
-    private UUID id = UUID.randomUUID();
+    @Column(name = "id", length = 36, updatable = false, nullable = false)
+    private String id = UUID.randomUUID().toString();
 
     @Column(name = "organization_name")
     private String organizationName;
@@ -45,11 +45,11 @@ public class BankAccount {
     @OneToMany(mappedBy = "bankAccount", fetch = FetchType.LAZY)
     private List<Transaction> transactions;
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 

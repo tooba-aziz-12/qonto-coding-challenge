@@ -24,9 +24,9 @@ CREATE TABLE transactions (
 
 -- changeset tooba:insert-bank-accounts
 INSERT INTO bank_accounts (id, organization_name, balance_cents, iban, bic) VALUES
-('11111111-1111-1111-1111-111111111111', 'ACME Corp', 10000000, 'FR10474608000002006107XXXXX', 'OIVUSCLQXXX');
+('7f3b9e62-4d8e-4c98-b35e-2f89a7d44fae', 'ACME Corp', 10000000, 'FR10474608000002006107XXXXX', 'OIVUSCLQXXX');
 
 -- changeset tooba:insert-transactions
 INSERT INTO transactions (id, counterparty_name, counterparty_iban, counterparty_bic, amount_cents, amount_currency, bank_account_id, description) VALUES
-('22222222-2222-2222-2222-222222222222', 'ACME Corp. Main Account', 'EE382200221020145685', 'CCOPFRPPXXX', 11000000, 'EUR', '11111111-1111-1111-1111-111111111111', 'Treasury income'),
-('33333333-3333-3333-3333-333333333333', 'Bip Bip', 'EE383680981021245685', 'CRLYFRPPTOU', -1000000, 'EUR', '11111111-1111-1111-1111-111111111111', 'Bip Bip Salary');
+('a6d2b4c1-9a64-4e7f-b65d-88f8e601d94c', 'ACME Corp. Main Account', 'EE382200221020145685', 'CCOPFRPPXXX', 11000000, 'EUR', '7f3b9e62-4d8e-4c98-b35e-2f89a7d44fae', 'Treasury income'),
+('c1fa3d77-5e0a-4bd4-92fb-f2be95f65e3f', 'Bip Bip', 'EE383680981021245685', 'CRLYFRPPTOU', 1000000, 'EUR', '7f3b9e62-4d8e-4c98-b35e-2f89a7d44fae', 'Bip Bip Salary');
