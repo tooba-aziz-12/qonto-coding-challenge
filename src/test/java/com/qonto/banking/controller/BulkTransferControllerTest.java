@@ -121,8 +121,16 @@ class BulkTransferIntegrationTest {
 
         BankAccount sender = bankAccountRepository.findByIbanAndBic("IBAN_BIG", "BIC_BIG").orElseThrow();
 
-        long expectedCentsA = new BigDecimal("1234.56789").multiply(BigDecimal.valueOf(100)).longValue();
-        long expectedCentsB = new BigDecimal("9876.54321").multiply(BigDecimal.valueOf(100)).longValue();
+        long expectedCentsA = new BigDecimal("1234.56789")
+                .setScale(2, BigDecimal.ROUND_HALF_UP)
+                .multiply(BigDecimal.valueOf(100))
+                .longValueExact();
+
+        long expectedCentsB = new BigDecimal("9876.54321")
+                .setScale(2, BigDecimal.ROUND_HALF_UP)
+                .multiply(BigDecimal.valueOf(100))
+                .longValueExact();
+
         long totalExpectedCents = expectedCentsA + expectedCentsB;
 
         long expectedRemainingBalance = totalBalanceInCents - totalExpectedCents;

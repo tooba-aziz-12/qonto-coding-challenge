@@ -1,6 +1,7 @@
 package com.qonto.banking.service;
 
 import com.qonto.banking.dto.BulkTransferRequest;
+import com.qonto.banking.dto.CreditTransfer;
 import com.qonto.banking.exception.AccountNotFoundException;
 import com.qonto.banking.exception.BulkTransferFailedException;
 import com.qonto.banking.exception.InsufficientFundsException;
@@ -44,19 +45,13 @@ public class BulkTransferService {
             System.out.println("Sender balance before: " + sender.getBalanceCents());
 
             Long totalCents = request.getCreditTransfers().stream()
-                    .map(t -> {
-                        BigDecimal cents =   new BigDecimal(t.getAmount()).multiply(BigDecimal.valueOf(100));
-
-                        System.out.println("============== Euro to Cents ===========");
-                        System.out.println(cents);
-                        return cents;
-                        }
+                    .map(t ->
+                        new BigDecimal(t.getAmount())
+                                .setScale(2,BigDecimal.ROUND_HALF_UP )
+                                .multiply(BigDecimal.valueOf(100))
                     )
-                    .mapToLong(BigDecimal::longValue)
+                    .mapToLong(BigDecimal::longValueExact)
                     .sum();
-
-            System.out.println("Total cents to deduct: " + totalCents);
-
 
             if (sender.getBalanceCents() < totalCents) {
                 throw new InsufficientFundsException(encodedIban);

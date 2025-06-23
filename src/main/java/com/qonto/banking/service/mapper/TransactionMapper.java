@@ -16,7 +16,10 @@ public class TransactionMapper {
                 creditTransfer.getCounterpartyName(),
                 creditTransfer.getCounterpartyIban(),
                 creditTransfer.getCounterpartyBic(),
-                new BigDecimal(creditTransfer.getAmount()).multiply(BigDecimal.valueOf(100)).longValue(),
+                new BigDecimal(creditTransfer.getAmount())
+                        .setScale(2, BigDecimal.ROUND_HALF_UP)
+                        .multiply(BigDecimal.valueOf(100))
+                        .longValueExact(),
                 "EUR",
                 creditTransfer.getDescription(),
                 sender
