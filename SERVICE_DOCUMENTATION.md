@@ -107,6 +107,7 @@ This mirrors how banks and credit card companies round amounts on invoices or st
 - Authentication and authorisation should be implemented
 - Message queues (e.g., Kafka, RabbitMQ) could be introduced for decoupling the transfer processor and the external notification system, increasing resilience
 - Timeouts and circuit breakers should be implemented for external service calls using a library like Resilience4j
+- Dockerization can be improved, all dependencies should be added to the same script with the project run mechanism enabled for more production readiness
 - The Service can benefit from clean architecture principles as the code base grows. DDD could help make code more scalable for this service
 - There should be a robust alerting strategy implemented on this due to the criticality of the feature i.e money movement
 - Currency support could be expanded to include multi-currency transfers with conversion logic
