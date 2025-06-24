@@ -4,17 +4,17 @@
 
 This project simulates a **banking bulk transfer system** with support for:
 
-- ✅ Transactional safety (isolation level: SERIALIZABLE)
-- ✅ Event-driven architecture to notify external service to deposit money to the receiver's account
-- ✅ External transfer notification (semantically modeled as an event-based HTTP notifier)
-- ✅ Retry support for failed notifications (semantically modeled)
-- ✅ Retry logic through cron (fetch from db and execute)
-- ✅ High-precision monetary operations 
-- ✅ Integration and unit test coverage
+- Transactional safety (isolation level: SERIALIZABLE)
+- Event-driven architecture to notify external service to deposit money to the receiver's account
+- External transfer notification (semantically modeled as an event-based HTTP notifier)
+- Retry support for failed notifications (semantically modeled)
+- Retry logic through cron (fetch from db and execute)
+- High-precision monetary operations 
+- Integration and unit test coverage
 
 ---
 
-## 🧾 Transfer Flow
+## Transfer Flow
 
 1. `BulkTransferService` processes the request:
     - Validates sender account and funds
@@ -38,7 +38,7 @@ This project simulates a **banking bulk transfer system** with support for:
 
 ---
 
-## 🔑 Key Components
+## Key Components
 
 ### `BulkTransferService`
 - Accepts `BulkTransferRequest`
@@ -82,7 +82,7 @@ Rounding with `BigDecimal.ROUND_HALF_UP` follows the common financial rule of:
 
 This mirrors how banks and credit card companies round amounts on invoices or statements.
 
-## 🧪 Test Strategy
+## Test Strategy
 
 - Integration tests using `@SpringBootTest` and `MockMvc`
 - Precision handling tests for high-value decimal input
@@ -105,6 +105,6 @@ Open the project in IntelliJ (or any Java IDE)
 
 Make sure you have Java 21
 
-Run BulkTransferApplication.java
+**Run BulkTransferApplication.java**
 
 The app will auto-connect to MySQL and generate schema.
