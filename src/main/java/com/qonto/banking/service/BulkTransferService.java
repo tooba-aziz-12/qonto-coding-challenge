@@ -59,7 +59,7 @@ public class BulkTransferService {
             // The listener will:
             // 1. Attempt to notify external system of transfer
             // 2. If notification fails → enqueue (db) for retry the failing ones
-            // 3. A scheduled cron job runs daily to reattempt these failed rollbacks from the DB
+            // 3. A scheduled cron job runs daily to reattempt these failed transfers from the DB
             // 4. If retry fails , alerting mechanism to escalate to dev team.
 
             /* eventPublisher.publishEvent(new BulkTransferCompletedEvent(

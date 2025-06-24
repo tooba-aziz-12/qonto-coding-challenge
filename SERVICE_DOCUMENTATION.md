@@ -14,6 +14,17 @@ This project simulates a **banking bulk transfer system** with support for:
 
 ---
 
+## Assumptions
+
+- The flow of money is outwards always i.e From a qonto account to an external account 
+- The money sent out is always a positive value, so a deposit essentially
+- There is an external service responsible to deposit the transferred money into the receiver's account
+- There is an Http call to notify this external service of a transfer, the response of it will suggest if the deposit succeeded or failed
+- A cent is a whole number, no less than 1, anything below it will be rounded up
+- A high precision number for Euros like 125.452855 is not standard in real world financial systems , and so these numbers will always we rounded up to 2 decimal places e.g 125.45
+- Rounding half-up may cause the sender to transfer 1 cent more e.g "10.005" will be rounded to "10.01" (instead of truncated to "10.00"), aligning with financial norms that prevent systematic underpayment.
+- **IMPORTANT NOTE**: The code in this service for the retry flow of failed transfer deposits is a symantic demonstration of how the system would work and not syntactically accurate. This is due to the 5 hour limit of the test.
+
 ## Transfer Flow
 
 1. `BulkTransferService` processes the request:
@@ -88,6 +99,17 @@ This mirrors how banks and credit card companies round amounts on invoices or st
 - Precision handling tests for high-value decimal input
 - Failure simulation tests for insufficient funds and missing accounts
 - Placeholder: Test cases for rollback and retry logic (pending implementation)
+
+## Future Improvements 
+- Idempotency should be enforced on the /transfers/bulk endpoint to prevent accidental double transfers in the event of retries or network glitches
+- Monitory should be implemented to visualise incident patterns and quick finding of issues
+- Rate limiting should be added to protect against abuse or accidental system overload
+- Authentication and authorisation should be implemented
+- Message queues (e.g., Kafka, RabbitMQ) could be introduced for decoupling the transfer processor and the external notification system, increasing resilience
+- Timeouts and circuit breakers should be implemented for external service calls using a library like Resilience4j
+- The Service can benefit from clean architecture principles as the code base grows. DDD could help make code more scalable for this service
+- There should be a robust alerting strategy implemented on this due to the criticality of the feature i.e money movement
+- Currency support could be expanded to include multi-currency transfers with conversion logic
 
 # Project Setup Guide
 
